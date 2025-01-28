@@ -1,0 +1,96 @@
+{
+  "workflow_name": "SOC Automation Project",
+  "description": "Workflow for SOC automation integrating Wazuh, The Hive, and Shuffle.",
+  "steps": [
+    {
+      "name": "Wazuh Alerts",
+      "type": "webhook",
+      "config": {
+        "url": "http://<YOUR_SHUFFLE_URL>/api/v1/hooks/<HOOK_ID>",
+        "method": "POST",
+        "headers": {},
+        "body": {
+          "alert": "$exec.alert"
+        }
+      }
+    },
+    {
+      "name": "Extract Hash",
+      "type": "regex_capture_group",
+      "config": {
+        "pattern": "SHA256=([A-Fa-f0-9]{64})",
+        "source": "$exec.alert",
+        "capture_group": "sha256_hash"
+      }
+    },
+    {
+      "name": "VirusTotal Lookup",
+      "type": "api_call",
+      "config": {
+        "api_url": "https://www.virustotal.com/api/v3/files/$sha256_hash",
+        "method": "GET",
+        "headers": {
+          "x-apikey": "<VIRUSTOTAL_API_KEY>"
+        }
+      }
+    },
+    {
+      "name": "Block Malicious IP",
+      "type": "api_call",
+      "config": {
+        "api_url": "http://<FIREWALL_API_URL>/block_ip",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer <FIREWALL_API_KEY>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "ip": "$exec.alert.source_ip",
+          "reason": "Detected malicious activity related to Mimikatz."
+        }
+      }
+    },
+    {
+      "name": "Create Case in The Hive",
+      "type": "api_call",
+      "config": {
+        "api_url": "http://<HIVE_SERVER>:9000/api/alert",
+        "method": "POST",
+        "headers": {
+          "Authorization": "Bearer <HIVE_API_KEY>",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "title": "Mimikatz Alert: $sha256_hash",
+          "description": "Alert detected by Wazuh and analyzed via VirusTotal.",
+          "type": "external",
+          "source": "Wazuh",
+          "severity": 3,
+          "tlp": 2,
+          "tags": ["T1003", "Mimikatz"],
+          "artifacts": [
+            {
+              "dataType": "hash",
+              "data": "$sha256_hash",
+              "message": "SHA256 hash of the suspicious file."
+            },
+            {
+              "dataType": "ip",
+              "data": "$exec.alert.source_ip",
+              "message": "Source IP of detected activity."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Notify Analyst via Email",
+      "type": "email",
+      "config": {
+        "recipient": "analyst@example.com",
+        "subject": "SOC Alert: Mimikatz Activity Detected",
+        "body": "An alert has been generated for potential Mimikatz activity. Please review the case in The Hive."
+      }
+    }
+  ]
+}
