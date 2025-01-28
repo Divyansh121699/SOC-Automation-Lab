@@ -1,0 +1,68 @@
+<ossec_config>
+  <global>
+    <alerts_log>yes</alerts_log>
+    <email_notification>no</email_notification>
+    <logall>yes</logall>
+    <log_format>json</log_format>
+  </global>
+
+  <localfile>
+    <location>Microsoft-Windows-Sysmon/Operational</location>
+    <log_format>eventchannel</log_format>
+  </localfile>
+
+  <integration>
+    <name>shuffle</name>
+    <hook_url>http://<YOUR_SHUFFLE_URL>/api/v1/hooks/<HOOK_ID></hook_url>
+    <rule_id>100002</rule_id>
+    <alert_format>json</alert_format>
+  </integration>
+
+  <rules>
+    <include>rules_config.xml</include>
+    <include>local_rules.xml</include>
+  </rules>
+
+  <logging>
+    <log_level>debug</log_level>
+    <log_format>plain</log_format>
+  </logging>
+
+  <alerts>
+    <email_alerts>no</email_alerts>
+    <log_alerts>yes</log_alerts>
+  </alerts>
+
+  <active-response>
+    <disabled>no</disabled>
+    <command>restart-ossec</command>
+  </active-response>
+
+  <auth>
+    <disabled>no</disabled>
+    <server>
+      <address>127.0.0.1</address>
+      <port>1515</port>
+      <protocol>tcp</protocol>
+    </server>
+  </auth>
+
+  <remote>
+    <connection>
+      <port>1514</port>
+      <protocol>tcp</protocol>
+      <queue_size>5000</queue_size>
+    </connection>
+  </remote>
+
+  <agent>
+    <name>windows-client</name>
+    <ip>192.168.1.100</ip>
+    <key>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...</key>
+  </agent>
+
+  <alerts>
+    <log_alerts>yes</log_alerts>
+    <email_alerts>no</email_alerts>
+  </alerts>
+</ossec_config>
