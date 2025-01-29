@@ -122,3 +122,10 @@ This **detailed visualization of the Shuffle workflow** shows how security alert
    - Wazuh should execute remediation steps (e.g., blocking IPs, terminating processes).
 
 ---
+
+## **6. Acknowledgments**
+This project was inspired by the following YouTube tutorial series:
+- **[SOC Automation Project](https://www.youtube.com/watch?v=Lb_ukgtYK_U&list=PLEd_qaF8wpnXgdngqfsQtYYGM-IdtuxmC)**  
+  Special thanks to the **MyDFIR** for providing detailed guidance on setting up the SOC Automation Project environment.
+
+---
